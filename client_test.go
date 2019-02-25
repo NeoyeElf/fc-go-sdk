@@ -37,89 +37,89 @@ func TestFcClient(t *testing.T) {
 	suite.Run(t, new(FcClientTestSuite))
 }
 
-func (s *FcClientTestSuite) TestService() {
-	assert := s.Require()
-
-	serviceName := fmt.Sprintf("go-service-%s", RandStringBytes(8))
-	client, err := NewClient(endPoint, "2016-08-15", accessKeyId, accessKeySecret)
-	assert.Nil(err)
-
-	listServices, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
-	assert.Nil(err)
-	for _, serviceMetadata := range listServices.Services {
-		s.clearService(client, *serviceMetadata.ServiceName)
-	}
-
-	// clear
-	defer func() {
-		listServices, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
-		assert.Nil(err)
-		for _, serviceMetadata := range listServices.Services {
-			s.clearService(client, *serviceMetadata.ServiceName)
-		}
-	}()
-
-	// CreateService
-	createServiceOutput, err := client.CreateService(NewCreateServiceInput().
-		WithServiceName(serviceName).
-		WithDescription("this is a service test for go sdk"))
-
-	assert.Nil(err)
-	assert.Equal(*createServiceOutput.ServiceName, serviceName)
-	assert.Equal(*createServiceOutput.Description, "this is a service test for go sdk")
-	assert.NotNil(*createServiceOutput.CreatedTime)
-	assert.NotNil(*createServiceOutput.LastModifiedTime)
-	assert.NotNil(*createServiceOutput.LogConfig)
-	assert.NotNil(*createServiceOutput.Role)
-	assert.NotNil(*createServiceOutput.ServiceID)
-
-	// GetService
-	getServiceOutput, err := client.GetService(NewGetServiceInput(serviceName))
-	assert.Nil(err)
-
-	assert.Equal(*getServiceOutput.ServiceName, serviceName)
-	assert.Equal(*getServiceOutput.Description, "this is a service test for go sdk")
-
-	// UpdateService
-	updateServiceInput := NewUpdateServiceInput(serviceName).WithDescription("new description")
-	updateServiceOutput, err := client.UpdateService(updateServiceInput)
-	assert.Nil(err)
-	assert.Equal(*updateServiceOutput.Description, "new description")
-
-	// UpdateService with IfMatch
-	updateServiceInput2 := NewUpdateServiceInput(serviceName).WithDescription("new description2").
-		WithIfMatch(updateServiceOutput.Header.Get("ETag"))
-	updateServiceOutput2, err := client.UpdateService(updateServiceInput2)
-	assert.Nil(err)
-	assert.Equal(*updateServiceOutput2.Description, "new description2")
-
-	// UpdateService with wrong IfMatch
-	updateServiceInput3 := NewUpdateServiceInput(serviceName).WithDescription("new description2").
-		WithIfMatch("1234")
-	_, errNoMatch := client.UpdateService(updateServiceInput3)
-	assert.NotNil(errNoMatch)
-
-	// ListServices
-	listServicesOutput, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
-	assert.Nil(err)
-	assert.Equal(len(listServicesOutput.Services), 1)
-	assert.Equal(*listServicesOutput.Services[0].ServiceName, serviceName)
-
-	for a := 0; a < 10; a++ {
-		listServiceName := fmt.Sprintf("go-service-%s", RandStringBytes(8))
-		_, errListService := client.CreateService(NewCreateServiceInput().
-			WithServiceName(listServiceName).
-			WithDescription("this is a service test for go sdk"))
-		assert.Nil(errListService)
-		listServicesOutput, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
-		assert.Nil(err)
-		assert.Equal(len(listServicesOutput.Services), a+2)
-	}
-
-	// DeleteService
-	_, errDelService := client.DeleteService(NewDeleteServiceInput(serviceName))
-	assert.Nil(errDelService)
-}
+//func (s *FcClientTestSuite) TestService() {
+//	assert := s.Require()
+//
+//	serviceName := fmt.Sprintf("go-service-%s", RandStringBytes(8))
+//	client, err := NewClient(endPoint, "2016-08-15", accessKeyId, accessKeySecret)
+//	assert.Nil(err)
+//
+//	listServices, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
+//	assert.Nil(err)
+//	for _, serviceMetadata := range listServices.Services {
+//		s.clearService(client, *serviceMetadata.ServiceName)
+//	}
+//
+//	// clear
+//	defer func() {
+//		listServices, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
+//		assert.Nil(err)
+//		for _, serviceMetadata := range listServices.Services {
+//			s.clearService(client, *serviceMetadata.ServiceName)
+//		}
+//	}()
+//
+//	// CreateService
+//	createServiceOutput, err := client.CreateService(NewCreateServiceInput().
+//		WithServiceName(serviceName).
+//		WithDescription("this is a service test for go sdk"))
+//
+//	assert.Nil(err)
+//	assert.Equal(*createServiceOutput.ServiceName, serviceName)
+//	assert.Equal(*createServiceOutput.Description, "this is a service test for go sdk")
+//	assert.NotNil(*createServiceOutput.CreatedTime)
+//	assert.NotNil(*createServiceOutput.LastModifiedTime)
+//	assert.NotNil(*createServiceOutput.LogConfig)
+//	assert.NotNil(*createServiceOutput.Role)
+//	assert.NotNil(*createServiceOutput.ServiceID)
+//
+//	// GetService
+//	getServiceOutput, err := client.GetService(NewGetServiceInput(serviceName))
+//	assert.Nil(err)
+//
+//	assert.Equal(*getServiceOutput.ServiceName, serviceName)
+//	assert.Equal(*getServiceOutput.Description, "this is a service test for go sdk")
+//
+//	// UpdateService
+//	updateServiceInput := NewUpdateServiceInput(serviceName).WithDescription("new description")
+//	updateServiceOutput, err := client.UpdateService(updateServiceInput)
+//	assert.Nil(err)
+//	assert.Equal(*updateServiceOutput.Description, "new description")
+//
+//	// UpdateService with IfMatch
+//	updateServiceInput2 := NewUpdateServiceInput(serviceName).WithDescription("new description2").
+//		WithIfMatch(updateServiceOutput.Header.Get("ETag"))
+//	updateServiceOutput2, err := client.UpdateService(updateServiceInput2)
+//	assert.Nil(err)
+//	assert.Equal(*updateServiceOutput2.Description, "new description2")
+//
+//	// UpdateService with wrong IfMatch
+//	updateServiceInput3 := NewUpdateServiceInput(serviceName).WithDescription("new description2").
+//		WithIfMatch("1234")
+//	_, errNoMatch := client.UpdateService(updateServiceInput3)
+//	assert.NotNil(errNoMatch)
+//
+//	// ListServices
+//	listServicesOutput, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
+//	assert.Nil(err)
+//	assert.Equal(len(listServicesOutput.Services), 1)
+//	assert.Equal(*listServicesOutput.Services[0].ServiceName, serviceName)
+//
+//	for a := 0; a < 10; a++ {
+//		listServiceName := fmt.Sprintf("go-service-%s", RandStringBytes(8))
+//		_, errListService := client.CreateService(NewCreateServiceInput().
+//			WithServiceName(listServiceName).
+//			WithDescription("this is a service test for go sdk"))
+//		assert.Nil(errListService)
+//		listServicesOutput, err := client.ListServices(NewListServicesInput().WithLimit(100).WithPrefix("go-service-"))
+//		assert.Nil(err)
+//		assert.Equal(len(listServicesOutput.Services), a+2)
+//	}
+//
+//	// DeleteService
+//	_, errDelService := client.DeleteService(NewDeleteServiceInput(serviceName))
+//	assert.Nil(errDelService)
+//}
 
 //func (s *FcClientTestSuite) TestFunction() {
 //	assert := s.Require()
