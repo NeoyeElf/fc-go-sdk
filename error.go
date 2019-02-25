@@ -11,10 +11,10 @@ var (
 
 // ServiceError defines error from fc
 type ServiceError struct {
-	HTTPStatus   int    `json:"HttpStatus"`
-	RequestID    string `json:"RequestId"`
-	ErrorCode    string `json:"ErrorCode"`
-	ErrorMessage string `json:"ErrorMessage"`
+	HTTPStatus   int    `json:"httpStatus"`
+	RequestID    string `json:"requestId"`
+	ErrorCode    string `json:"errorCode"`
+	ErrorMessage string `json:"errorMessage"`
 }
 
 func (e ServiceError) String() string {
