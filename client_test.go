@@ -121,104 +121,104 @@ func (s *FcClientTestSuite) TestService() {
 	assert.Nil(errDelService)
 }
 
-func (s *FcClientTestSuite) TestFunction() {
-	assert := s.Require()
-	serviceName := fmt.Sprintf("go-service-%s", RandStringBytes(10))
-	client, err := NewClient(endPoint, "2016-08-15", accessKeyId, accessKeySecret)
-
-	assert.Nil(err)
-
-	defer s.clearService(client, serviceName)
-
-	// CreateService
-	_, err2 := client.CreateService(NewCreateServiceInput().
-		WithServiceName(serviceName).
-		WithDescription("this is a function test for go sdk"))
-	assert.Nil(err2)
-
-	// CreateFunction
-	functionName := fmt.Sprintf("go-function-%s", RandStringBytes(8))
-	createFunctionInput1 := NewCreateFunctionInput(serviceName).WithFunctionName(functionName).
-		WithDescription("go sdk test function").
-		WithHandler("hello_world.handler").WithRuntime("nodejs6").
-		WithCode(NewCode().
-			WithOSSBucketName(codeBucketName).
-			WithOSSObjectName("hello_world_nodejs.zip")).
-		WithTimeout(5)
-	createFunctionOutput, err := client.CreateFunction(createFunctionInput1)
-	assert.Nil(err)
-
-	assert.Equal(*createFunctionOutput.FunctionName, functionName)
-	assert.Equal(*createFunctionOutput.Description, "go sdk test function")
-	assert.Equal(*createFunctionOutput.Runtime, "nodejs6")
-	assert.Equal(*createFunctionOutput.Handler, "hello_world.handler")
-	assert.NotNil(*createFunctionOutput.CreatedTime)
-	assert.NotNil(*createFunctionOutput.LastModifiedTime)
-	assert.NotNil(*createFunctionOutput.CodeChecksum)
-	assert.NotNil(*createFunctionOutput.CodeSize)
-	assert.NotNil(*createFunctionOutput.FunctionID)
-	assert.NotNil(*createFunctionOutput.MemorySize)
-	assert.NotNil(*createFunctionOutput.Timeout)
-
-	// GetFunction
-	getFunctionOutput, err := client.GetFunction(NewGetFunctionInput(serviceName, functionName))
-	assert.Nil(err)
-	assert.Equal(*getFunctionOutput.FunctionName, functionName)
-	assert.Equal(*getFunctionOutput.Description, "go sdk test function")
-	assert.Equal(*getFunctionOutput.Runtime, "nodejs6")
-	assert.Equal(*getFunctionOutput.Handler, "hello_world.handler")
-	assert.Equal(*getFunctionOutput.CreatedTime, *createFunctionOutput.CreatedTime)
-	assert.Equal(*getFunctionOutput.LastModifiedTime, *createFunctionOutput.LastModifiedTime)
-	assert.Equal(*getFunctionOutput.CodeChecksum, *createFunctionOutput.CodeChecksum)
-	assert.Equal(*createFunctionOutput.CodeSize, *createFunctionOutput.CodeSize)
-	assert.Equal(*createFunctionOutput.FunctionID, *createFunctionOutput.FunctionID)
-	assert.Equal(*createFunctionOutput.MemorySize, *createFunctionOutput.MemorySize)
-	assert.Equal(*createFunctionOutput.Timeout, *createFunctionOutput.Timeout)
-
-	functionName2 := fmt.Sprintf("go-function-%s", RandStringBytes(8))
-	_, errReCreate := client.CreateFunction(createFunctionInput1.WithFunctionName(functionName2))
-	assert.Nil(errReCreate)
-
-	// ListFunctions
-	listFunctionsOutput, err := client.ListFunctions(NewListFunctionsInput(serviceName).WithPrefix("go-function-"))
-	assert.Nil(err)
-	assert.Equal(len(listFunctionsOutput.Functions), 2)
-	assert.True(*listFunctionsOutput.Functions[0].FunctionName == functionName || *listFunctionsOutput.Functions[1].FunctionName == functionName)
-	assert.True(*listFunctionsOutput.Functions[0].FunctionName == functionName2 || *listFunctionsOutput.Functions[1].FunctionName == functionName2)
-
-	// UpdateFunction
-	updateFunctionOutput, err := client.UpdateFunction(NewUpdateFunctionInput(serviceName, functionName).
-		WithDescription("newdesc"))
-	assert.Equal(*updateFunctionOutput.Description, "newdesc")
-
-	// InvokeFunction
-	invokeInput := NewInvokeFunctionInput(serviceName, functionName).WithLogType("Tail")
-	invokeOutput, err := client.InvokeFunction(invokeInput)
-	assert.Nil(err)
-	logResult, err := invokeOutput.GetLogResult()
-	assert.NotNil(logResult)
-	assert.NotNil(invokeOutput.GetRequestID())
-	assert.Equal(string(invokeOutput.Payload), "hello world")
-
-	invokeInput = NewInvokeFunctionInput(serviceName, functionName).WithLogType("None")
-	invokeOutput, err = client.InvokeFunction(invokeInput)
-	assert.NotNil(invokeOutput.GetRequestID())
-	assert.Equal(string(invokeOutput.Payload), "hello world")
-
-	// TestFunction use local zipfile
-	functionName = fmt.Sprintf("go-function-%s", RandStringBytes(8))
-	createFunctionInput := NewCreateFunctionInput(serviceName).WithFunctionName(functionName).
-		WithDescription("go sdk test function").
-		WithHandler("main.my_handler").WithRuntime("python2.7").
-		WithCode(NewCode().WithFiles("./testCode/hello_world.zip")).
-		WithTimeout(5)
-	_, errCreateLocalFile := client.CreateFunction(createFunctionInput)
-	assert.Nil(errCreateLocalFile)
-	invokeOutput, err = client.InvokeFunction(invokeInput)
-	assert.Nil(err)
-	assert.NotNil(invokeOutput.GetRequestID())
-	assert.Equal(string(invokeOutput.Payload), "hello world")
-}
+//func (s *FcClientTestSuite) TestFunction() {
+//	assert := s.Require()
+//	serviceName := fmt.Sprintf("go-service-%s", RandStringBytes(10))
+//	client, err := NewClient(endPoint, "2016-08-15", accessKeyId, accessKeySecret)
+//
+//	assert.Nil(err)
+//
+//	defer s.clearService(client, serviceName)
+//
+//	// CreateService
+//	_, err2 := client.CreateService(NewCreateServiceInput().
+//		WithServiceName(serviceName).
+//		WithDescription("this is a function test for go sdk"))
+//	assert.Nil(err2)
+//
+//	// CreateFunction
+//	functionName := fmt.Sprintf("go-function-%s", RandStringBytes(8))
+//	createFunctionInput1 := NewCreateFunctionInput(serviceName).WithFunctionName(functionName).
+//		WithDescription("go sdk test function").
+//		WithHandler("hello_world.handler").WithRuntime("nodejs6").
+//		WithCode(NewCode().
+//			WithOSSBucketName(codeBucketName).
+//			WithOSSObjectName("hello_world_nodejs.zip")).
+//		WithTimeout(5)
+//	createFunctionOutput, err := client.CreateFunction(createFunctionInput1)
+//	assert.Nil(err)
+//
+//	assert.Equal(*createFunctionOutput.FunctionName, functionName)
+//	assert.Equal(*createFunctionOutput.Description, "go sdk test function")
+//	assert.Equal(*createFunctionOutput.Runtime, "nodejs6")
+//	assert.Equal(*createFunctionOutput.Handler, "hello_world.handler")
+//	assert.NotNil(*createFunctionOutput.CreatedTime)
+//	assert.NotNil(*createFunctionOutput.LastModifiedTime)
+//	assert.NotNil(*createFunctionOutput.CodeChecksum)
+//	assert.NotNil(*createFunctionOutput.CodeSize)
+//	assert.NotNil(*createFunctionOutput.FunctionID)
+//	assert.NotNil(*createFunctionOutput.MemorySize)
+//	assert.NotNil(*createFunctionOutput.Timeout)
+//
+//	// GetFunction
+//	getFunctionOutput, err := client.GetFunction(NewGetFunctionInput(serviceName, functionName))
+//	assert.Nil(err)
+//	assert.Equal(*getFunctionOutput.FunctionName, functionName)
+//	assert.Equal(*getFunctionOutput.Description, "go sdk test function")
+//	assert.Equal(*getFunctionOutput.Runtime, "nodejs6")
+//	assert.Equal(*getFunctionOutput.Handler, "hello_world.handler")
+//	assert.Equal(*getFunctionOutput.CreatedTime, *createFunctionOutput.CreatedTime)
+//	assert.Equal(*getFunctionOutput.LastModifiedTime, *createFunctionOutput.LastModifiedTime)
+//	assert.Equal(*getFunctionOutput.CodeChecksum, *createFunctionOutput.CodeChecksum)
+//	assert.Equal(*createFunctionOutput.CodeSize, *createFunctionOutput.CodeSize)
+//	assert.Equal(*createFunctionOutput.FunctionID, *createFunctionOutput.FunctionID)
+//	assert.Equal(*createFunctionOutput.MemorySize, *createFunctionOutput.MemorySize)
+//	assert.Equal(*createFunctionOutput.Timeout, *createFunctionOutput.Timeout)
+//
+//	functionName2 := fmt.Sprintf("go-function-%s", RandStringBytes(8))
+//	_, errReCreate := client.CreateFunction(createFunctionInput1.WithFunctionName(functionName2))
+//	assert.Nil(errReCreate)
+//
+//	// ListFunctions
+//	listFunctionsOutput, err := client.ListFunctions(NewListFunctionsInput(serviceName).WithPrefix("go-function-"))
+//	assert.Nil(err)
+//	assert.Equal(len(listFunctionsOutput.Functions), 2)
+//	assert.True(*listFunctionsOutput.Functions[0].FunctionName == functionName || *listFunctionsOutput.Functions[1].FunctionName == functionName)
+//	assert.True(*listFunctionsOutput.Functions[0].FunctionName == functionName2 || *listFunctionsOutput.Functions[1].FunctionName == functionName2)
+//
+//	// UpdateFunction
+//	updateFunctionOutput, err := client.UpdateFunction(NewUpdateFunctionInput(serviceName, functionName).
+//		WithDescription("newdesc"))
+//	assert.Equal(*updateFunctionOutput.Description, "newdesc")
+//
+//	// InvokeFunction
+//	invokeInput := NewInvokeFunctionInput(serviceName, functionName).WithLogType("Tail")
+//	invokeOutput, err := client.InvokeFunction(invokeInput)
+//	assert.Nil(err)
+//	logResult, err := invokeOutput.GetLogResult()
+//	assert.NotNil(logResult)
+//	assert.NotNil(invokeOutput.GetRequestID())
+//	assert.Equal(string(invokeOutput.Payload), "hello world")
+//
+//	invokeInput = NewInvokeFunctionInput(serviceName, functionName).WithLogType("None")
+//	invokeOutput, err = client.InvokeFunction(invokeInput)
+//	assert.NotNil(invokeOutput.GetRequestID())
+//	assert.Equal(string(invokeOutput.Payload), "hello world")
+//
+//	// TestFunction use local zipfile
+//	functionName = fmt.Sprintf("go-function-%s", RandStringBytes(8))
+//	createFunctionInput := NewCreateFunctionInput(serviceName).WithFunctionName(functionName).
+//		WithDescription("go sdk test function").
+//		WithHandler("main.my_handler").WithRuntime("python2.7").
+//		WithCode(NewCode().WithFiles("./testCode/hello_world.zip")).
+//		WithTimeout(5)
+//	_, errCreateLocalFile := client.CreateFunction(createFunctionInput)
+//	assert.Nil(errCreateLocalFile)
+//	invokeOutput, err = client.InvokeFunction(invokeInput)
+//	assert.Nil(err)
+//	assert.NotNil(invokeOutput.GetRequestID())
+//	assert.Equal(string(invokeOutput.Payload), "hello world")
+//}
 
 func (s *FcClientTestSuite) TestTrigger() {
 	assert := s.Require()
