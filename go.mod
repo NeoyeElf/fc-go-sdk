@@ -1,4 +1,4 @@
-module github.com/aliyun/fc-go-sdk
+module github.com/NeoyeElf/fc-go-sdk
 
 require (
 	github.com/stretchr/testify v1.3.0 // indirect
